@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "rules": [
+    { "id": "intl_new_year", "nameEn": "International New Year", "nameKm": "ទិវាចូលឆ្នាំសកល", "type": "fixed", "month": 1, "day": 1 },
+    { "id": "victory_day", "nameEn": "Victory over Genocide Day", "nameKm": "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍", "type": "fixed", "month": 1, "day": 7 },
+    { "id": "womens_day", "nameEn": "International Women's Day", "nameKm": "ទិវានារីអន្តរជាតិ", "type": "fixed", "month": 3, "day": 8 },
+    { "id": "khmer_new_year", "nameEn": "Khmer New Year Festival", "nameKm": "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ", "type": "fixed", "month": 4, "day": 13, "days": 4 },
+    { "id": "labour_day", "nameEn": "International Labour Day", "nameKm": "ទិវាពលកម្មអន្តរជាតិ", "type": "fixed", "month": 5, "day": 1 },
+    { "id": "king_birthday", "nameEn": "King's Birthday", "nameKm": "ព្រះរាជពិធីបុណ្យចំរើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "type": "fixed", "month": 5, "day": 14 },
+    { "id": "queen_mother_birthday", "nameEn": "Queen Mother's Birthday", "nameKm": "ព្រះរាជពិធីបុណ្យចំរើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនិនាថ សីហនុ", "type": "fixed", "month": 6, "day": 18 },
+    { "id": "constitution_day", "nameEn": "Constitution Day", "nameKm": "ទិវារដ្ឋធម្មនុញ្ញ", "type": "fixed", "month": 9, "day": 24 },
+    { "id": "king_father_commemoration", "nameEn": "King Father's Commemoration Day", "nameKm": "ទិវាប្រារព្ធពិធីគោរពព្រះវិញ្ញាណក្ខន្ធ ព្រះករុណា ព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ", "type": "fixed", "month": 10, "day": 15 },
+    { "id": "coronation_day", "nameEn": "Coronation Day", "nameKm": "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី", "type": "fixed", "month": 10, "day": 29 },
+    { "id": "independence_day", "nameEn": "Independence Day", "nameKm": "ពិធីបុណ្យឯករាជ្យជាតិ", "type": "fixed", "month": 11, "day": 9 },
+
+    { "id": "meak_bochea", "nameEn": "Meak Bochea Day", "nameKm": "ពិធីបុណ្យមាឃបូជា", "type": "lunar", "lunarMonth": "MEAK", "phase": "KERT", "lunarDay": 15 },
+    { "id": "visak_bochea", "nameEn": "Visak Bochea Day", "nameKm": "ពិធីបុណ្យវិសាខបូជា", "type": "lunar", "lunarMonth": "PISAKH", "phase": "KERT", "lunarDay": 15 },
+    { "id": "plowing_ceremony", "nameEn": "Royal Plowing Ceremony", "nameKm": "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល", "type": "lunar", "lunarMonth": "PISAKH", "phase": "ROCH", "lunarDay": 4 },
+    { "id": "pchum_ben", "nameEn": "Pchum Ben Day", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ", "type": "lunar", "lunarMonth": "ASOCH", "phase": "ROCH", "lunarDay": 14, "days": 3 },
+    { "id": "bon_om_touk", "nameEn": "Water Festival (Bon Om Touk)", "nameKm": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែ អកអំបុក", "type": "lunar", "lunarMonth": "KADEUK", "phase": "KERT", "lunarDay": 14, "days": 3 }
+  ],
+
+  "extras": [
+    { "id": "khmer_new_year", "date": "2025-04-14", "nameEn": "Khmer New Year Day 1", "nameKm": "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ ថ្ងៃទី១" },
+    { "id": "khmer_new_year", "date": "2025-04-15", "nameEn": "Khmer New Year Day 2", "nameKm": "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ ថ្ងៃទី២" },
+    { "id": "khmer_new_year", "date": "2025-04-16", "nameEn": "Khmer New Year Day 3", "nameKm": "ពិធីបុណ្យចូលឆ្នាំថ្មី ប្រពៃណីជាតិ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2024-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2024-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2024-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2025-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2025-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2025-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2026-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2026-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2026-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2027-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2027-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2027-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2028-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2028-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2028-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2029-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2029-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី២" },
+    { "id": "pchum_ben", "date": "2029-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+
+    { "id": "pchum_ben", "date": "2030-10-10", "nameEn": "Pchum Ben Day 1", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី១" },
+    { "id": "pchum_ben", "date": "2030-10-11", "nameEn": "Pchum Ben Day 2", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" },
+    { "id": "pchum_ben", "date": "2030-10-12", "nameEn": "Pchum Ben Day 3", "nameKm": "ពិធីបុណ្យភ្ជុំបិណ្ឌ ថ្ងៃទី៣" }
+  ]
+}
