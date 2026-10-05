@@ -85,7 +85,7 @@ fun LiquidGlassTabBar(
                     .fillMaxWidth(1f / tabCount)
                     .align(BiasAlignment(horizontalBias = indicatorBias, verticalBias = 0f))
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f))
             )
         }
 

@@ -7,6 +7,7 @@ import com.khmer.calendar.data.repository.KhmerCalendarRepositoryImpl
 import com.khmer.calendar.ui.model.CalendarEffect
 import com.khmer.calendar.ui.model.CalendarIntent
 import com.khmer.calendar.ui.model.CalendarState
+import com.khmer.calendar.ui.model.CalendarTab
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,6 +57,9 @@ class CalendarViewModel(
             is CalendarIntent.SelectYear -> {
                 _uiState.update { it.copy(currentYear = intent.year) }
                 loadDataForCurrentMonthAndYear()
+                viewModelScope.launch {
+                    _effect.emit(CalendarEffect.ScrollToMonth(intent.year, _uiState.value.currentMonth))
+                }
             }
         }
     }
@@ -80,6 +84,10 @@ class CalendarViewModel(
             )
         }
         loadDataForCurrentMonthAndYear()
+
+        viewModelScope.launch {
+            _effect.emit(CalendarEffect.ScrollToMonth(newYear, newMonth))
+        }
     }
 
     private fun goToToday() {
@@ -91,13 +99,15 @@ class CalendarViewModel(
                 currentYear = today.year,
                 currentMonth = today.monthValue,
                 selectedDate = todayKhmerDate,
-                isDayDetailSheetVisible = true
+                currentTab = CalendarTab.CALENDAR,
+                isDayDetailSheetVisible = false
             )
         }
         loadDataForCurrentMonthAndYear()
 
         viewModelScope.launch {
-            _effect.emit(CalendarEffect.ShowToast("បានត្រឡប់ទៅថ្ងៃនេះ"))
+            _effect.emit(CalendarEffect.ScrollToMonth(today.year, today.monthValue))
+           // _effect.emit(CalendarEffect.ShowToast("បានត្រឡប់ទៅថ្ងៃនេះ"))
         }
     }
 

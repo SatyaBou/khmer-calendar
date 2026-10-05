@@ -71,10 +71,6 @@ fun MonthGridView(
                         .weight(1f)
                         .padding(horizontal = 1.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (isSelectedDay) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                            else Color.Transparent
-                        )
                         .padding(vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
