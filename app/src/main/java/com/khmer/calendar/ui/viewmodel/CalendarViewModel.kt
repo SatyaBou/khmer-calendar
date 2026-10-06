@@ -1,9 +1,11 @@
 package com.khmer.calendar.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.khmer.calendar.data.repository.KhmerCalendarRepository
 import com.khmer.calendar.data.repository.KhmerCalendarRepositoryImpl
+import com.khmer.calendar.data.settings.SettingsRepository
 import com.khmer.calendar.ui.model.CalendarEffect
 import com.khmer.calendar.ui.model.CalendarIntent
 import com.khmer.calendar.ui.model.CalendarState
@@ -18,9 +20,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class CalendarViewModel(
-    private val repository: KhmerCalendarRepository = KhmerCalendarRepositoryImpl()
-) : ViewModel() {
+class CalendarViewModel @JvmOverloads constructor(
+    application: Application,
+    private val repository: KhmerCalendarRepository = KhmerCalendarRepositoryImpl(),
+    private val settingsRepository: SettingsRepository = SettingsRepository(application)
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(CalendarState())
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
@@ -30,6 +34,15 @@ class CalendarViewModel(
 
     init {
         loadDataForCurrentMonthAndYear()
+        observeSettings()
+    }
+
+    private fun observeSettings() {
+        viewModelScope.launch {
+            settingsRepository.settings.collect { newSettings ->
+                _uiState.update { it.copy(settings = newSettings) }
+            }
+        }
     }
 
     fun processIntent(intent: CalendarIntent) {
@@ -60,6 +73,33 @@ class CalendarViewModel(
                 viewModelScope.launch {
                     _effect.emit(CalendarEffect.ScrollToMonth(intent.year, _uiState.value.currentMonth))
                 }
+            }
+            is CalendarIntent.ToggleSettingsSheet -> {
+                _uiState.update { it.copy(isSettingsSheetVisible = intent.show) }
+            }
+            is CalendarIntent.UpdateLanguage -> {
+                settingsRepository.updateLanguage(intent.language)
+            }
+            is CalendarIntent.UpdateThemeMode -> {
+                settingsRepository.updateThemeMode(intent.themeMode)
+            }
+            is CalendarIntent.UpdateFirstDayOfWeek -> {
+                settingsRepository.updateFirstDayOfWeek(intent.firstDay)
+            }
+            is CalendarIntent.UpdateShowLunarDate -> {
+                settingsRepository.updateShowLunarDate(intent.show)
+            }
+            is CalendarIntent.UpdateShowBuddhaDays -> {
+                settingsRepository.updateShowBuddhaDays(intent.show)
+            }
+            is CalendarIntent.UpdateShowHolidays -> {
+                settingsRepository.updateShowHolidays(intent.show)
+            }
+            is CalendarIntent.UpdateBuddhaDayReminders -> {
+                settingsRepository.updateBuddhaDayReminders(intent.enable)
+            }
+            is CalendarIntent.UpdateHolidayReminders -> {
+                settingsRepository.updateHolidayReminders(intent.enable)
             }
         }
     }
@@ -107,7 +147,6 @@ class CalendarViewModel(
 
         viewModelScope.launch {
             _effect.emit(CalendarEffect.ScrollToMonth(today.year, today.monthValue))
-           // _effect.emit(CalendarEffect.ShowToast("បានត្រឡប់ទៅថ្ងៃនេះ"))
         }
     }
 

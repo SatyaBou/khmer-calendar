@@ -10,19 +10,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,20 +45,34 @@ import com.khmer.calendar.data.util.KhmerUtils
 import com.khmer.calendar.ui.theme.BuddhaDayGold
 import com.khmer.calendar.ui.theme.HolidayRed
 import com.khmer.calendar.ui.theme.KhmerRed
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayDetailSheet(
     khmerDate: KhmerDate?,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isKhmer: Boolean = true
 ) {
     if (khmerDate == null) return
 
-    val sheetState = rememberModalBottomSheetState()
+    var allowDismiss by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        confirmValueChange = { targetValue ->
+            if (targetValue == SheetValue.Hidden) allowDismiss else true
+        }
+    )
+
+    val headerText = if (isKhmer) {
+        "ថ្ងៃ${khmerDate.dayOfWeekKhmer} ទី${khmerDate.dayKhmerNumeral} ខែ${khmerDate.monthNameKhmer} ឆ្នាំ${khmerDate.yearKhmerNumeral}"
+    } else {
+        "${KhmerUtils.getDayOfWeek(khmerDate.date, false)}, ${khmerDate.dayOfMonth} ${KhmerUtils.getSolarMonth(khmerDate.month, false)} ${khmerDate.year}"
+    }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { /* Disable dismiss on outside click / back press */ },
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
@@ -56,23 +81,51 @@ fun DayDetailSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
-            // Gregorian Date Header
-            Text(
-                text = "ថ្ងៃ${khmerDate.dayOfWeekKhmer} ទី${khmerDate.dayKhmerNumeral} ខែ${khmerDate.monthNameKhmer} ឆ្នាំ${khmerDate.yearKhmerNumeral}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // Gregorian & Khmer Lunar Date Header Row with Close button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = headerText,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-            // Full Khmer Lunar Date
-            Text(
-                text = khmerDate.fullKhmerDateFormatted,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                color = KhmerRed
-            )
+                    Text(
+                        text = khmerDate.fullKhmerDateFormatted,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = KhmerRed
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                IconButton(
+                    onClick = {
+                        allowDismiss = true
+                        coroutineScope.launch {
+                            sheetState.hide()
+                            onDismiss()
+                        }
+                    },
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
@@ -94,19 +147,19 @@ fun DayDetailSheet(
                         Icon(
                             painterResource(id = R.drawable.ic_sil_day),
                             modifier = Modifier.size(30.dp),
-                            contentDescription = "ថ្ងៃសីល",
+                            contentDescription = if (isKhmer) "ថ្ងៃសីល" else "Buddha Day",
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "ថ្ងៃសីល",
+                                text = if (isKhmer) "ថ្ងៃសីល" else "Buddha Day",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = BuddhaDayGold
                             )
                             Text(
-                                text = khmerDate.buddhaDayTitle ?: "ថ្ងៃសីល",
+                                text = khmerDate.buddhaDayTitle ?: (if (isKhmer) "ថ្ងៃសីល" else "Buddha Day"),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -120,6 +173,9 @@ fun DayDetailSheet(
             // Holiday Card (if applicable)
             if (khmerDate.isHoliday && khmerDate.holiday != null) {
                 val holiday = khmerDate.holiday
+                val holidayTitle = if (isKhmer) holiday.nameKhmer else holiday.descriptionKhmer.ifBlank { holiday.nameKhmer }
+                val holidayDesc = if (isKhmer) holiday.descriptionKhmer else holiday.nameKhmer
+
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = HolidayRed.copy(alpha = 0.12f)
@@ -133,26 +189,26 @@ fun DayDetailSheet(
                     ) {
                         Image(
                             painter = painterResource(holiday.imageRes),
-                            contentDescription = holiday.nameKhmer,
+                            contentDescription = holidayTitle,
                             modifier = Modifier.size(36.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "ថ្ងៃឈប់សម្រាក - ${holiday.dateFormatted}",
+                                text = if (isKhmer) "ថ្ងៃឈប់សម្រាក - ${holiday.dateFormatted}" else "Public Holiday - ${holiday.dateFormatted}",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = HolidayRed
                             )
                             Text(
-                                text = holiday.nameKhmer,
+                                text = holidayTitle,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            if (holiday.descriptionKhmer.isNotBlank()) {
+                            if (holidayDesc.isNotBlank()) {
                                 Text(
-                                    text = holiday.descriptionKhmer,
+                                    text = holidayDesc,
                                     fontSize = 13.sp,
                                     color = Color.Gray
                                 )
@@ -173,16 +229,19 @@ fun DayDetailSheet(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     DetailRow(
-                        label = "ពុទ្ធសករាជ (BE):",
-                        value = "ព.ស. ${KhmerUtils.toKhmerNumeral(khmerDate.buddhistEra)}"
+                        label = if (isKhmer) "ពុទ្ធសករាជ (BE):" else "Buddhist Era (BE):",
+                        value = "ព.ស. ${KhmerUtils.formatNumber(khmerDate.buddhistEra, isKhmer)}"
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     DetailRow(
-                        label = "ឆ្នាំច៖",
+                        label = if (isKhmer) "ឆ្នាំច៖" else "Zodiac Year:",
                         value = "${khmerDate.zodiacYear} ${khmerDate.sakName}"
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    DetailRow(label = "ចន្ទគតិខ្មែរ៖", value = khmerDate.lunarDateFormatted)
+                    DetailRow(
+                        label = if (isKhmer) "ចន្ទគតិខ្មែរ៖" else "Khmer Lunar Date:",
+                        value = khmerDate.lunarDateFormatted
+                    )
                 }
             }
 

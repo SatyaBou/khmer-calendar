@@ -34,14 +34,17 @@ enum class CalendarViewMode(val labelKm: String, val labelEn: String) {
     DAY("ថ្ងៃ", "Day"),
     WEEK("សប្តាហ៍", "Week"),
     MONTH("ខែ", "Month"),
-    YEAR("ឆ្នាំ", "Year")
+    YEAR("ឆ្នាំ", "Year");
+
+    fun getLabel(isKhmer: Boolean): String = if (isKhmer) labelKm else labelEn
 }
 
 @Composable
 fun LiquidGlassTabBar(
     selectedMode: CalendarViewMode,
     onModeSelected: (CalendarViewMode) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isKhmer: Boolean = true
 ) {
     val modes = CalendarViewMode.entries
     val tabCount = modes.size
@@ -120,7 +123,7 @@ fun LiquidGlassTabBar(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = mode.labelKm,
+                        text = mode.getLabel(isKhmer),
                         fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         color = textColor,

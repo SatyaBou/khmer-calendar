@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Khmer Calendar</string>
+    <string name="settings_title">Settings</string>
+    <string name="language_title">Language</string>
+    <string name="theme_title">Theme &amp; Appearance</string>
+    <string name="first_day_title">First Day of Week</string>
+    <string name="display_options_title">Display Options</string>
+    <string name="reminders_title">Reminders</string>
+    <string name="about_app_title">About App</string>
+</resources>

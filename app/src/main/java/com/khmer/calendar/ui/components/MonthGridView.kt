@@ -3,7 +3,6 @@ package com.khmer.calendar.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,14 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,9 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.khmer.calendar.R
 import com.khmer.calendar.data.model.KhmerDate
+import com.khmer.calendar.data.settings.AppLanguage
+import com.khmer.calendar.data.settings.AppSettings
 import com.khmer.calendar.data.util.KhmerUtils
 import com.khmer.calendar.ui.theme.HolidayRed
-import com.khmer.calendar.ui.theme.background
 import java.time.LocalDate
 
 @Composable
@@ -45,8 +41,12 @@ fun MonthGridView(
     monthDays: List<KhmerDate>,
     selectedDate: KhmerDate?,
     onSelectDate: (KhmerDate) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    settings: AppSettings = AppSettings()
 ) {
+    val isKhmer = settings.language == AppLanguage.KHMER
+    val weekdays = if (isKhmer) KhmerUtils.KHMER_WEEKDAYS else KhmerUtils.ENGLISH_WEEKDAYS_SHORT
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -64,7 +64,7 @@ fun MonthGridView(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            KhmerUtils.KHMER_WEEKDAYS.forEachIndexed { index, weekday ->
+            weekdays.forEachIndexed { index, weekday ->
                 val isSelectedDay = index == currentDayOfWeekIndex
                 Box(
                     modifier = Modifier
@@ -101,6 +101,10 @@ fun MonthGridView(
                             khmerDate = khmerDate,
                             isSelected = isSelected,
                             onSelect = onSelectDate,
+                            isKhmer = isKhmer,
+                            showLunarDate = settings.showLunarDate,
+                            showBuddhaDays = settings.showBuddhaDays,
+                            showHolidays = settings.showHolidays,
                             modifier = Modifier
                                 .weight(1f)
                                 .aspectRatio(0.85f)
@@ -120,39 +124,49 @@ fun MonthGridView(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Buddha Day Legend
-            Image(
-                painter = painterResource(id = R.drawable.ic_sil_day),
-                contentDescription = "Buddha Day",
-                modifier = Modifier.size(12.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "ថ្ងៃសីល",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+            if (settings.showBuddhaDays) {
+                // Buddha Day Legend
+                Image(
+                    painter = painterResource(id = R.drawable.ic_sil_day),
+                    contentDescription = "Buddha Day",
+                    modifier = Modifier.size(12.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (isKhmer) "ថ្ងៃសីល" else "Buddha Day",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
 
-            Spacer(modifier = Modifier.width(24.dp))
+                if (settings.showHolidays) {
+                    Spacer(modifier = Modifier.width(24.dp))
+                }
+            }
 
-            // Holiday Legend
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(HolidayRed)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "ថ្ងៃឈប់សម្រាក",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+            if (settings.showHolidays) {
+                // Holiday Legend
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(HolidayRed)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = if (isKhmer) "ថ្ងៃឈប់សម្រាក" else "Public Holiday",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
         }
 
         // Holiday Content for Current Month
-        val monthHolidays = remember(monthDays) {
-            monthDays.filter { it.isCurrentMonth && it.isHoliday && it.holiday != null }
+        val monthHolidays = remember(monthDays, settings.showHolidays) {
+            if (settings.showHolidays) {
+                monthDays.filter { it.isCurrentMonth && it.isHoliday && it.holiday != null }
+            } else {
+                emptyList()
+            }
         }
 
         if (monthHolidays.isNotEmpty()) {
@@ -162,7 +176,7 @@ fun MonthGridView(
                     .padding(top = 8.dp)
             ) {
                 Text(
-                    text = "ថ្ងៃឈប់សម្រាកប្រចាំខែ",
+                    text = if (isKhmer) "ថ្ងៃឈប់សម្រាកប្រចាំខែ" else "Monthly Holidays",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -174,7 +188,8 @@ fun MonthGridView(
                     HolidayCard(
                         khmerDate = khmerDate,
                         holiday = holiday,
-                        onClick = { onSelectDate(khmerDate) }
+                        onClick = { onSelectDate(khmerDate) },
+                        isKhmer = isKhmer
                     )
                 }
             }

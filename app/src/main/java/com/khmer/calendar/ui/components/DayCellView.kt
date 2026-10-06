@@ -50,10 +50,15 @@ fun DayCellView(
     khmerDate: KhmerDate,
     isSelected: Boolean,
     onSelect: (KhmerDate) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isKhmer: Boolean = true,
+    showLunarDate: Boolean = true,
+    showBuddhaDays: Boolean = true,
+    showHolidays: Boolean = true
 ) {
     val isToday = khmerDate.isToday
     val isCurrentMonth = khmerDate.isCurrentMonth
+    val isHolidayActive = khmerDate.isHoliday && showHolidays
 
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -69,7 +74,7 @@ fun DayCellView(
         targetValue = when {
             isToday -> KhmerGold
             isSelected -> KhmerGold.copy(alpha = 0.25f)
-            khmerDate.isHoliday -> HolidayRed.copy(alpha = 0.08f)
+            isHolidayActive -> HolidayRed.copy(alpha = 0.08f)
             else -> Color.Transparent
         },
         animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
@@ -80,7 +85,7 @@ fun DayCellView(
         targetValue = when {
             isToday -> Color.White
             !isCurrentMonth -> Color.Gray.copy(alpha = 0.4f)
-            khmerDate.isHoliday -> HolidayRed
+            isHolidayActive -> HolidayRed
             else -> MaterialTheme.colorScheme.onSurface
         },
         animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
@@ -95,8 +100,12 @@ fun DayCellView(
         Modifier
     }
 
-    val lunarPhaseText =
-        "${KhmerUtils.toKhmerNumeral(khmerDate.lunarDay)}${if (khmerDate.isWaxing) "កើត" else "រោច"}"
+    val dayNumeral = if (isKhmer) khmerDate.dayKhmerNumeral else khmerDate.dayOfMonth.toString()
+    val lunarPhaseText = if (isKhmer) {
+        "${KhmerUtils.toKhmerNumeral(khmerDate.lunarDay)}${if (khmerDate.isWaxing) " កើត" else " រោច"}"
+    } else {
+        "${khmerDate.lunarDay}${if (khmerDate.isWaxing) " Koeut" else " Roach"}"
+    }
 
     LaunchedEffect(isPressed) {
         if (isPressed) {
@@ -124,7 +133,7 @@ fun DayCellView(
             },
         contentAlignment = Alignment.Center
     ) {
-        if (khmerDate.isBuddhaDay && isCurrentMonth) {
+        if (khmerDate.isBuddhaDay && isCurrentMonth && showBuddhaDays) {
             Image(
                 painter = painterResource(id = R.drawable.ic_sil_day),
                 contentDescription = "Buddha Day",
@@ -142,24 +151,26 @@ fun DayCellView(
         ) {
             // Solar Day Numeral
             Text(
-                text = khmerDate.dayKhmerNumeral,
+                text = dayNumeral,
                 fontSize = 16.sp,
                 fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Medium,
                 color = textColor,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            if (showLunarDate) {
+                Spacer(modifier = Modifier.height(2.dp))
 
-            // Khmer Lunar Phase Day Text
-            Text(
-                text = lunarPhaseText,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Normal,
-                color = if (isToday) Color.White.copy(alpha = 0.9f) else textColor,
-                textAlign = TextAlign.Center,
-                maxLines = 1
-            )
+                // Khmer Lunar Phase Day Text
+                Text(
+                    text = lunarPhaseText,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = if (isToday) Color.White.copy(alpha = 0.9f) else textColor,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
+                )
+            }
 
             Spacer(modifier = Modifier.height(4.dp))
         }

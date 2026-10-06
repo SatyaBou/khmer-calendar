@@ -30,17 +30,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.khmer.calendar.data.model.Holiday
 import com.khmer.calendar.data.model.KhmerDate
+import com.khmer.calendar.data.util.KhmerUtils
 import com.khmer.calendar.ui.theme.HolidayRed
-import com.khmer.calendar.ui.theme.KhmerBgCream
-import com.khmer.calendar.ui.theme.background
 
 @Composable
 fun HolidayCard(
     khmerDate: KhmerDate,
     holiday: Holiday,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isKhmer: Boolean = true
 ) {
+    val title = if (isKhmer) holiday.nameKhmer else holiday.descriptionKhmer.ifBlank { holiday.nameKhmer }
+    val description = if (isKhmer) {
+        if (holiday.descriptionKhmer.isNotBlank() && holiday.descriptionKhmer != holiday.nameKhmer) {
+            holiday.descriptionKhmer
+        } else {
+            "ពិធីបុណ្យ${holiday.nameKhmer}"
+        }
+    } else {
+        holiday.nameKhmer
+    }
+
+    val dateStr = if (isKhmer) {
+        "${khmerDate.monthNameKhmer} ${khmerDate.dayKhmerNumeral}"
+    } else {
+        "${KhmerUtils.getSolarMonth(khmerDate.month, false)} ${khmerDate.dayOfMonth}"
+    }
+
+    val tagText = if (isKhmer) {
+        "ថ្ងៃឈប់សម្រាកសាធារណៈ • ${khmerDate.lunarDateFormatted}"
+    } else {
+        "Public Holiday • ${khmerDate.lunarDateFormatted}"
+    }
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
@@ -73,7 +96,7 @@ fun HolidayCard(
             ) {
                 Image(
                     painter = painterResource(id = holiday.imageRes),
-                    contentDescription = holiday.nameKhmer,
+                    contentDescription = title,
                     modifier = Modifier
                         .size(84.dp)
                         .clip(RoundedCornerShape(18.dp)),
@@ -87,9 +110,9 @@ fun HolidayCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // Top Date Range / Date Header in Red
+                // Top Date Header in Red
                 Text(
-                    text = "${khmerDate.monthNameKhmer} ${khmerDate.dayKhmerNumeral}",
+                    text = dateStr,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = HolidayRed
@@ -99,18 +122,13 @@ fun HolidayCard(
 
                 // Event Title
                 Text(
-                    text = holiday.nameKhmer,
+                    text = title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 // Subtitle / Description
-                val description = if (holiday.descriptionKhmer.isNotBlank()) {
-                    holiday.descriptionKhmer
-                } else {
-                    "ពិធីបុណ្យ${holiday.nameKhmer}"
-                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = description,
@@ -118,10 +136,10 @@ fun HolidayCard(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
                 )
 
-                // Tag / Notification line
+                // Tag line
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "ថ្ងៃឈប់សម្រាកសាធារណៈ • ${khmerDate.lunarDateFormatted}",
+                    text = tagText,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFFC5A059)

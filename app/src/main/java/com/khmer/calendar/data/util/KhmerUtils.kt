@@ -22,6 +22,14 @@ object KhmerUtils {
         return sb.toString()
     }
 
+    fun formatNumber(number: Int, isKhmer: Boolean = true): String {
+        return if (isKhmer) toKhmerNumeral(number) else number.toString()
+    }
+
+    fun formatNumber(text: String, isKhmer: Boolean = true): String {
+        return if (isKhmer) toKhmerNumeral(text) else text
+    }
+
     val KHMER_WEEKDAYS = arrayOf(
         "អាទិត្យ",   // Sunday
         "ច័ន្ទ",      // Monday
@@ -32,8 +40,22 @@ object KhmerUtils {
         "សៅរ៍"       // Saturday
     )
 
+    val ENGLISH_WEEKDAYS = arrayOf(
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+    )
+
     val KHMER_WEEKDAYS_SHORT = arrayOf(
         "អា", "ច", "អ", "ព", "ព្រ", "សុ", "ស"
+    )
+
+    val ENGLISH_WEEKDAYS_SHORT = arrayOf(
+        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
     )
 
     val KHMER_SOLAR_MONTHS = arrayOf(
@@ -49,6 +71,21 @@ object KhmerUtils {
         "តុលា",    // Oct
         "វិច្ឆិកា",   // Nov
         "ធ្នូ"      // Dec
+    )
+
+    val ENGLISH_SOLAR_MONTHS = arrayOf(
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
     )
 
     val KHMER_LUNAR_MONTHS = arrayOf(
@@ -72,9 +109,21 @@ object KhmerUtils {
         return KHMER_WEEKDAYS[dayIndex]
     }
 
+    fun getDayOfWeek(date: LocalDate, isKhmer: Boolean = true): String {
+        val dayIndex = date.dayOfWeek.value % 7
+        return if (isKhmer) KHMER_WEEKDAYS[dayIndex] else ENGLISH_WEEKDAYS[dayIndex]
+    }
+
     fun getSolarMonthKhmer(monthOneBased: Int): String {
         if (monthOneBased in 1..12) {
             return KHMER_SOLAR_MONTHS[monthOneBased - 1]
+        }
+        return ""
+    }
+
+    fun getSolarMonth(monthOneBased: Int, isKhmer: Boolean = true): String {
+        if (monthOneBased in 1..12) {
+            return if (isKhmer) KHMER_SOLAR_MONTHS[monthOneBased - 1] else ENGLISH_SOLAR_MONTHS[monthOneBased - 1]
         }
         return ""
     }

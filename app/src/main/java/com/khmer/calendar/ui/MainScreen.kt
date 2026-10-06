@@ -1,7 +1,5 @@
 package com.khmer.calendar.ui
 
-import android.R
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -11,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -35,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.khmer.calendar.data.settings.AppLanguage
 import com.khmer.calendar.data.util.KhmerCalendarCalculator
 import com.khmer.calendar.data.util.KhmerUtils
 import com.khmer.calendar.ui.components.CalendarViewMode
@@ -68,6 +67,7 @@ import com.khmer.calendar.ui.components.DayDetailSheet
 import com.khmer.calendar.ui.components.DayView
 import com.khmer.calendar.ui.components.LiquidGlassTabBar
 import com.khmer.calendar.ui.components.MonthGridView
+import com.khmer.calendar.ui.components.SettingsSheet
 import com.khmer.calendar.ui.components.WeekView
 import com.khmer.calendar.ui.components.YearGridView
 import com.khmer.calendar.ui.model.CalendarEffect
@@ -84,7 +84,7 @@ fun MainScreen(
     viewModel: CalendarViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val isKhmer = state.settings.language == AppLanguage.KHMER
     var selectedViewMode by remember { mutableStateOf(CalendarViewMode.MONTH) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -112,9 +112,7 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is CalendarEffect.ShowToast -> {
-               //     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                }
+                is CalendarEffect.ShowToast -> { }
                 is CalendarEffect.ScrollToDate -> {
                     val targetPage = (effect.khmerDate.date.year - 2000) * 12 + (effect.khmerDate.date.monthValue - 1)
                     if (targetPage in 0..2399) {
@@ -138,7 +136,6 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-               // .statusBarsPadding()
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(
@@ -148,11 +145,15 @@ fun MainScreen(
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // Top App Header showing App Title & Current Day and Month Badge
+                    // Top App Header showing App Title & Current Day and Month Badge & Settings
                     TopHeaderRow(
+                        isKhmer = isKhmer,
                         onGoToToday = {
                             selectedViewMode = CalendarViewMode.MONTH
                             viewModel.processIntent(CalendarIntent.GoToToday)
+                        },
+                        onOpenSettings = {
+                            viewModel.processIntent(CalendarIntent.ToggleSettingsSheet(true))
                         }
                     )
 
@@ -200,9 +201,13 @@ fun MainScreen(
                                 )
 
                                 val titleText = if (selectedViewMode == CalendarViewMode.YEAR) {
-                                    "ឆ្នាំ${KhmerUtils.toKhmerNumeral(year)}"
+                                    if (isKhmer) "ឆ្នាំ${KhmerUtils.toKhmerNumeral(year)}" else "Year $year"
                                 } else {
-                                    "ខែ${KhmerUtils.getSolarMonthKhmer(month)} ឆ្នាំ${KhmerUtils.toKhmerNumeral(year)}"
+                                    if (isKhmer) {
+                                        "ខែ${KhmerUtils.getSolarMonthKhmer(month)} ឆ្នាំ${KhmerUtils.toKhmerNumeral(year)}"
+                                    } else {
+                                        "${KhmerUtils.getSolarMonth(month, false)} $year"
+                                    }
                                 }
 
                                 AnimatedContent(
@@ -247,7 +252,8 @@ fun MainScreen(
                             // Custom Tab Bar
                             LiquidGlassTabBar(
                                 selectedMode = selectedViewMode,
-                                onModeSelected = { selectedViewMode = it }
+                                onModeSelected = { selectedViewMode = it },
+                                isKhmer = isKhmer
                             )
 
                             // Mode Content with smooth transition (scaleIn 0.92f + fadeIn)
@@ -300,7 +306,8 @@ fun MainScreen(
                                                 selectedDate = state.selectedDate,
                                                 onSelectDate = { khmerDate ->
                                                     viewModel.processIntent(CalendarIntent.SelectDate(khmerDate))
-                                                }
+                                                },
+                                                settings = state.settings
                                             )
                                         }
                                         CalendarViewMode.YEAR -> {
@@ -333,6 +340,41 @@ fun MainScreen(
                     khmerDate = state.selectedDate,
                     onDismiss = {
                         viewModel.processIntent(CalendarIntent.DismissDayDetailSheet)
+                    },
+                    isKhmer = isKhmer
+                )
+            }
+
+            // Settings Sheet
+            if (state.isSettingsSheetVisible) {
+                SettingsSheet(
+                    settings = state.settings,
+                    onDismiss = {
+                        viewModel.processIntent(CalendarIntent.ToggleSettingsSheet(false))
+                    },
+                    onLanguageChange = { lang ->
+                        viewModel.processIntent(CalendarIntent.UpdateLanguage(lang))
+                    },
+                    onThemeChange = { mode ->
+                        viewModel.processIntent(CalendarIntent.UpdateThemeMode(mode))
+                    },
+                    onFirstDayChange = { firstDay ->
+                        viewModel.processIntent(CalendarIntent.UpdateFirstDayOfWeek(firstDay))
+                    },
+                    onShowLunarChange = { show ->
+                        viewModel.processIntent(CalendarIntent.UpdateShowLunarDate(show))
+                    },
+                    onShowBuddhaDaysChange = { show ->
+                        viewModel.processIntent(CalendarIntent.UpdateShowBuddhaDays(show))
+                    },
+                    onShowHolidaysChange = { show ->
+                        viewModel.processIntent(CalendarIntent.UpdateShowHolidays(show))
+                    },
+                    onBuddhaDayRemindersChange = { enable ->
+                        viewModel.processIntent(CalendarIntent.UpdateBuddhaDayReminders(enable))
+                    },
+                    onHolidayRemindersChange = { enable ->
+                        viewModel.processIntent(CalendarIntent.UpdateHolidayReminders(enable))
                     }
                 )
             }
@@ -342,15 +384,21 @@ fun MainScreen(
 
 @Composable
 private fun TopHeaderRow(
+    isKhmer: Boolean,
     onGoToToday: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val today = remember { LocalDate.now() }
-    val dayOfWeek = remember(today) { KhmerUtils.getDayOfWeekKhmer(today) }
-    val dayNumeral = remember(today) { KhmerUtils.toKhmerNumeral(today.dayOfMonth) }
-    val monthName = remember(today) { KhmerUtils.getSolarMonthKhmer(today.monthValue) }
+    val dayOfWeek = remember(today, isKhmer) { KhmerUtils.getDayOfWeek(today, isKhmer) }
+    val dayNumeral = remember(today, isKhmer) { KhmerUtils.formatNumber(today.dayOfMonth, isKhmer) }
+    val monthName = remember(today, isKhmer) { KhmerUtils.getSolarMonth(today.monthValue, isKhmer) }
 
-    val todayFormatted = "ថ្ងៃ$dayOfWeek ទី$dayNumeral $monthName"
+    val todayFormatted = if (isKhmer) {
+        "ថ្ងៃ$dayOfWeek ទី$dayNumeral $monthName"
+    } else {
+        "$dayOfWeek, $dayNumeral $monthName"
+    }
 
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -369,53 +417,64 @@ private fun TopHeaderRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "ប្រតិទិនខ្មែរ",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Surface(
-            onClick = {
-                isPressed = true
-                onGoToToday()
-            },
-            shape = RoundedCornerShape(20.dp),
-            color = KhmerGold.copy(alpha = 0.12f),
-            border = BorderStroke(1.dp, KhmerGold.copy(alpha = 0.6f)),
-            tonalElevation = 2.dp,
-            shadowElevation = 1.dp,
-            modifier = Modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+        IconButton(
+            onClick = onOpenSettings,
+            modifier = Modifier.size(38.dp)
         ) {
-            LaunchedEffect(isPressed) {
-                if (isPressed) {
-                    delay(120)
-                    isPressed = false
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Surface(
+                onClick = {
+                    isPressed = true
+                    onGoToToday()
+                },
+                shape = RoundedCornerShape(20.dp),
+                color = KhmerGold.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, KhmerGold.copy(alpha = 0.6f)),
+                tonalElevation = 2.dp,
+                shadowElevation = 1.dp,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+            ) {
+                LaunchedEffect(isPressed) {
+                    if (isPressed) {
+                        delay(120)
+                        isPressed = false
+                    }
+                }
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Go to Today",
+                        modifier = Modifier.size(16.dp),
+                        tint = KhmerGold
+                    )
+                    Text(
+                        text = todayFormatted,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = KhmerGold
+                    )
                 }
             }
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = "Go to Today",
-                    modifier = Modifier.size(16.dp),
-                    tint = KhmerGold
-                )
-                Text(
-                    text = todayFormatted,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = KhmerGold
-                )
-            }
+
+
         }
     }
 }
